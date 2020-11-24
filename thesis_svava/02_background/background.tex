@@ -1,0 +1,134 @@
+% this file is called up by thesis.tex
+% content in this file will be fed into the main document
+
+\chapter{Background} \label{sec:background}
+
+
+
+% ----------------------- contents from here ------------------------
+% 
+
+In this chapter, the most relevant concepts, architectures and technologies will be covered, in order to provide detail for the proceeding chapters. First, microservices architecture will be explained and the most relevant definition of it identified. Next, REST, GraphQL, gRPC and RSocket will be covered. For each one, the motivation and basic principles will be elaborated on, as well as the basic concepts and functionality.
+
+\section{Microservices Architecture}
+In the last five years (since 2015), interest in microservices has exploded. When the keyword "microservices" is used to search on Google Scholar\footnote{https://scholar.google.com/}, 716 results are returned for the period 1980-2015. In contrast, the results from 2016-2020 are around 12,100. The general consensus for the origins of the term is a workshop of software architects in Venice, 2011 \cite{fowler2014microservices} \cite{zimmermann2016microservices}. However, a few earlier papers have used the term to describe similar concepts, although these definitions do not completely match up with the current generally accepted definitions. Interestingly, it can be seen that over time, the definitions have evolved into what they are now, rather than the term being redefined for a completely different purpose.
+For reference, the current definitions describe microservices as small, narrow purpose, independently deployed web services which can be combined to form a larger system \cite{fowler2014microservices}.
+
+The first mention of microservices as an architectural term within the computer science field can be found in a dissertation by Viswanathan from 1994 \cite{viswanathan1994publishing}. Viswanathan classifies wireless information services by their geographical scope, and defines microservices as services that cover an area in the range of a few miles. This definition is quite different from the current one, as "micro" refers not to the size of the service itself, but rather as a description of the physical domain it covers. In 2000, Andre and Segarra \cite{andre2000generic} used the term to describe subtasks of a larger service, which approaches the modern definition while still being distinct from it.
+The 2002 student research paper "Vergleich Microsoft .NET mit Sun ONE" by Hockmann \cite{hockmann2002vergleich} (only available in German) contains a definition that is remarkably close to the current ones: microservices are defined as "discrete services which can be written in different languages and distributed on different platforms, and can be compiled together to form a complete web service". A similar definition can be found in the 2004 dissertation by Kim \cite{kim2004foundation}, where microservices are presented as "independently developable components that can be integrated together".
+
+The unifying factors throughout the different definitions are that a microservice should be a single (or narrow) purpose independently deployable service which can be combined with other microservices to form a larger system. Different requirements are then added, e.g. that the microservice should interact via messages \cite{dragoni2017microservices} or be developed and maintained by a dedicated, cross-functional team which handles the entire stack and life cycle of the microservice (data management, code, deployment, maintenance) \cite{fowler2014microservices}. Some view microservices as simply the "right" way to do SOA (Software Oriented Architecture) \cite{zimmermann2016microservices} while others claim that it is a new style distinct from SOA, in part due to the wide range of architectures that have been labelled SOA, many of which differ significantly from microservices architecture \cite{fowler2014microservices}.
+
+The definition used within Picnic fits best with the definition offered by Martin Fowler in his 2014 blog post simply titled "Microservices":
+\begin{quote}
+/textit{
+    In short, the microservice architectural style is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API. These services are built around business capabilities and independently deployable by fully automated deployment machinery. There is a bare minimum of centralized management of these services, which may be written in different programming languages and use different data storage technologies. \cite{fowler2014microservices}}
+\end{quote}
+This is the definition that will be used throughout this paper. Most importantly, no requirement is put on the mode of communication, neither internally (between microservices) nor externally (between the microservice ecosystem and its clients), aside from the requirement that the communication be "lightweight". 
+
+
+\section{REST} \label{sec:rest}
+The REST (REpresentational State Transfer) architectural style was developed by Roy Fielding and published in his 2000 doctoral dissertation \cite{fielding2000architectural}. At the time, the Web had been growing exponentially in size for a few years, beyond what Tim Berners-Lee and other early developers of the Web had designed it for. Fielding originally set out to describe the HTTP object model, but this effort quickly turned out to rather be an architectural style which, while designed with HTTP in mind, could be applied to any technology \cite{fielding2017reflections}. As Fielding phrased it:
+\begin{quote}
+\textit{
+The goal has always been to maintain a consistent and correct model of how I intend the Web architecture to behave, so that it could be used to guide the protocol standards that define appropriate behavior, rather than to create an artificial model that would be limited to the constraints originally imagined when the work began. \cite{fielding2000architectural}}
+\end{quote}
+As an architectural style, REST has several constraints that dictate what the roles and features of, and relationships between, elements should be. However, the choice whether to enforce these constraints is up to the developer of the API. The six constraints of REST are:
+\begin{enumerate}
+    \item \textbf{Client-Server}: The system should be divided into client and server, with the client handling the user interface and the server handling the data storage. This constraint is driven by the principle of \textit{separation of concerns}.
+    \item \textbf{Stateless}: Communication must be stateless, and any request cannot take advantage of stored context on the server.
+    \item \textbf{Cache}: Data within a response should be labeled as cacheable to allow clients to reuse the data later, to minimize the amount of requests made.
+    \item \textbf{Uniform interface}: Interfaces should be generalized, and implementations decoupled from the services they provide. The trade-off is that the information transferred is not in a form specific to the requesting application's needs.
+    \item \textbf{Layered system}: The system should be divided into layers, where each component in a layer is only aware of the layer it is communicating with.
+    \item \textbf{Code-On-Demand}: Client functionality can be extended by downloading and executing code in the form of applets or scripts, simplifying clients. This constraint is optional within REST.
+\end{enumerate}
+
+The main architectural element of REST is the \textit{resource}. A resource can represent a person, document, image, a collection of other resources or any other information that can be given a name. Resource identifiers are then used to refer to the resource, and this identifier is chosen by the author of the API. In Fielding's original dissertation, the only rule provided for how this should be done, is that the authority responsible for the assigned identifier should also ensure that the semantic validity of the identifier mapping should not change over time \cite{fielding2000architectural}. However, over the last two decades some general guidelines have been developed, which have been understood by many to be the "right" way to do REST. As an example, the book \textit{REST API Design Rulebook: Designing Consistent RESTful Web Service Interfaces} includes extensive rules such as "Underscores should not be used in URIs" and "A singular noun should be used for document names" \cite{masse2011rest}. When implemented over HTTP, the resource identifier is expressed as a URI, allowing for a tree-like representation of resources and sub-resources. Another key principle of REST is that methods to access and transform resources are the same for any kind of resource, e.g. if a REST API has a resource with the URI "/resource/{resourceId}" and a client invokes that endpoint with the HTTP GET method, the understanding is that the response will be a complete representation of the instance of that resource identified by the resource ID, no matter which resource it is \cite{fielding2017reflections}.
+
+\section{GraphQL}
+GraphQL is a graph query language designed by Facebook around 2012, and officially presented at a React.js conference in early 2015. It was developed during Facebook's move from HTML5-driven applications to native ones, and still to this day powers most interactions in the Android and iOS apps \cite{schrock2015blog}. The main motivation behind GraphQL was to serve as a communication protocol for Facebook's client applications, or as it is worded in the official specification for the language:
+\begin{quote}
+\textit{
+    GraphQL is a query language designed to build client applications by providing an intuitive and flexible syntax and system for describing their data requirements and interactions \cite{graphql2018spec}.}
+\end{quote}
+The language and accompanying framework is now maintained by the GraphQL foundation, a neutral entity hosted by the Linux Foundation. It is still used by Facebook, and has also been adopted by prominent members of the software industry such as Atlassian, GitHub, Shopify, Pinterest, Twitter and Yelp \cite{graphqlusers}.
+
+GraphQL is a query-based language for declarative data-fetching. GraphQL has five design principles:
+\begin{enumerate}
+    \item \textbf{Hierarchical}: Queries are structured hierarchically, and are shaped just like the data they return.
+    \item \textbf{Product-centric}: GraphQL is driven by the requirements of the engineers of the front-end clients.
+    \item \textbf{Strong-typing}: Each server defines a type system specific to its own structure. This type system is used to validate queries and make guarantees about the shape and format of the response.
+    \item \textbf{Client-specified queries}: Each server, through a schema, publishes the different functions available to clients. Clients specify how they want to use these functions and which fields and objects they want returned. This ensures that clients never receive data that they didn't specifically ask for.
+    \item \textbf{Introspective}: The type system of each server must be queryable by the GraphQL language itself, which in essence allows clients to request the schema itself. This helps clients know exactly which fields and types are available to them, and can even allow them to validate their queries before sending them to the server.
+\end{enumerate}
+
+\begin{lstlisting}[caption={An example GraphQL schema}, captionpos=b,label={lst:schema}]
+    type Query {
+      getUser(id: Int): User
+      getUsers: [User]
+    }
+    
+    type User {
+      id: Int
+      name: String
+      friends: [User]
+    }
+\end{lstlisting}
+A minimal example of a GraphQL schema can be seen in Listing \ref{lst:schema}. The schema defines a single type, a User with two primitively typed fields, and one which refers to a collection of other User typed objects. It is then up to the server's specific implementation how this is stored in a database and retrieved before being returned to the client. The schema also defines a single query type, which defines the queries available for clients to use. In this case, two queries are available. The first accepts a single \texttt{id} parameter and returns the user identified by that ID. The second accepts no parameters and returns a collection of (presumably) all the users stored by the server. Listing \ref{lst:query} shows an example usage of the first query. Noticeably, the query actually allows the client to fetch much more than could be expected: since each friend is a User type, the client can recursively query the friends of each of those friends.
+
+\begin{lstlisting}[caption={An example GraphQL query}, captionpos=b,label={lst:query}]
+{
+  getUser(id:12345) {
+    name
+    friends {
+      name
+      friends {
+        name
+      }
+    }
+  }
+\end{lstlisting}
+
+\section{RSocket}
+RSocket is a reactive message-based OSI layer 7 protocol announced in September 2018 at the SpringOne Platform conference in Washington DC. It is developed and supported by Netifi (founded by members of the team that created the RSocket project at Netflix), Facebook and Pivotal \cite{netifi2017rsocket} and is now maintained by the Reactive Foundation, hosted by the Linux foundation \cite{melanson2019rsockethome}. The foundation's members include large tech companies such as Facebook, VMWare and AliBaba \cite{reactivemembers}. 
+
+The development of RSocket was driven largely by the need for a communication protocol that embraces the principles of the Reactive Manifesto \cite{rsocketmotivations}.  The following list summarizes the motivations and key design principles of RSocket:
+
+\textbf{Message-driven}: All communication is modeled as non-blocking streams of messages over a single network connection.
+
+\textbf{Interaction models}: Beyond the typical behavior of client-server architectures, RSocket offers the following four interaction models:
+    \begin{itemize}
+        \item \textit{fire-and-forget}: The client sends a one-off message to the server without expecting or receiving a response.
+        \item \textit{request-response}: The client sends a request and receives a single message.
+        \item \textit{request-stream}: The client sends a request and receives a stream of messages.
+        \item The client and server set up a channel where the client can send multiple messages, expecting one or more response messages per message sent.
+    \end{itemize}
+
+\textbf{Behavior}: RSocket supports bi-directional requests, allowing both client and server to act as requester and responder. In addition, any stream can be cancelled by the requester allowing the responder to terminate early.
+
+\textbf{Resumability}: Sessions can easily be resumed after network failures or disruptions with a simple handshake.
+
+\textbf{Flow control}: Two forms of flow control are implemented. Firstly, the requester can dictate exactly how many messages it wants to receive at a time to prevent it from being overloaded. Secondly, a responder can issue a lease to the requester, which means that the requester knows that the server is not at full capacity, and can still receive requests.
+
+\textbf{Polyglot support}: The RSocket protocol provides a contract for the behavior between the client and server. Thus, it does not matter which languages each is written in, as long as they adhere to the contract.
+
+\textbf{Transport Layer Flexibility}: RSocket is not tied to TCP and is expected to work over any protocol with similar features (WebSockets, Aeron, QUIC).
+
+\textbf{Efficiency and Performance}: RSocket aims to improve performance by (among other things) avoiding handshakes as much as possible, using binary encoding and allocating less memory.
+
+\section{gRPC}
+gRPC is a remote procedure call (RPC) framework developed at Google in 2015 \cite{marculescu2015introducing}. Besides powering Google's microservices infrastructure, gRPC is currently used by companies such as Cisco, Netflix and Square \cite{aboutgrpc}. gRPC was developed as the open-source next version of Stubby, a non-standardized RPC infrastructure used for Google's internal microservices \cite{ryan2015motivation}. gRPC was designed to be a open-source, free framework which promotes the microservices design philosophy of message exchange.
+
+gRPC, like other RPC systems, is based around the idea of allowing clients to invoke remote server methods just as they would local methods. The server implements methods described by an interface and the client uses a \textit{stub} which offers the methods described by the interface. gRPC uses \textit{protocol buffers} to serialize structured data, which offers advantages over JSON such as field types, field IDs and rules (repeated, optional and required fields) \footnote{It is important to note that gRPC does not require using protocol buffers, and protocol buffers can be used with any transfer protocol. However, they are both developed by Google and gRPC uses protocol buffers by default. Most documentation recommends using protocol buffers for serialization and interface contracting. Thus this thesis will in most cases assume that protocol buffers are used with gRPC}. 
+gRPC is built on top of HTTP/2 and uses a traditional client/server interaction model, wherein the client can only request data from the server through the methods defined by the protocol buffer interface. gRPC offers both a blocking and non-blocking API, allowing clients to either synchronously or asynchronously request data from the server. gRPC also offers extensive features such as flow control, cancellations, lameducking and streaming \cite{ryan2015motivation}. Beyond the simple request-response functionality, the three modes of streaming offered in gRPC are the following \cite{grpccore}:
+\begin{itemize}
+    \item \textit{Server streaming}: The client sends a single request and receives a stream of messages in response.
+    \item \textit{Client streaming}: The client sends a stream of messages and receives a single message in response.
+    \item \textit{Bidirectional streaming}: The client initiates a call and sends a stream of messages to the server, which responds with a stream of messages. The streams are independent and it is up to each to decide how many messages to stream in response to each message received.
+\end{itemize}
+
+
+
+% ---------------------------------------------------------------------------
+% ----------------------- end of thesis sub-document ------------------------
+% ---------------------------------------------------------------------------

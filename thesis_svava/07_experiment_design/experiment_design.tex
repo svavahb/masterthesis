@@ -1,0 +1,42 @@
+\chapter{Experiment design}
+In this chapter, the design and implementation of the test cases used as the basis for the experiment will be discussed, as well as the metric used for the performance measurements.
+
+\section{Test cases}
+The primary goal of the experiments was to measure the overall time it took to execute a test case, thus providing insight into the latency of the different communication methods and the differences in performance. All the testing code was developed with Node.js and using the core module \texttt{perf\_hooks}, a time measurement was taken right before each test case iteration was set off. Another measurement was taken as soon as all data had arrived from the server, and the difference of these two measurements (in milliseconds) written to a file to register the total time taken to request and receive all the data required by the test case. Any work needed to set up connections before a request was made (as is needed for RSocket and gRPC) was included in the performance measurement to ensure a fair comparison. Furthermore, measures were taken to ensure the network conditions were also fair, by running all tests at the same place, with the same network setup and at around the same time of day.
+
+For each service, five test cases were defined, with the exception of GraphQL which had four (further explained below). These five test cases were designed to test a variety of scenarios representing real-world use cases, with a mix of single and multiple resources and sequential and parallel execution. The five test cases are as follows:
+\begin{enumerate}
+    \item Single resource: A single request-response for a single resource
+    \item Multiple related resources
+    \begin{enumerate}
+        \item \textit{In one request}: Fetch all resources in one ad-hoc request. The logic for connecting the resources together is on the server side.
+        \item \textit{In multiple requests} : Sequentially fetching each resource type in a separate request, connecting the resources together client-side.
+    \end{enumerate}
+    \item Multiple unrelated resources
+    \begin{enumerate}
+        \item \textit{Parallel}: Initiate the requests asynchronously and wait until all have returned a response.
+        \item \textit{Sequential}: Initiate the requests in sequence and wait until the last one has returned a response.
+    \end{enumerate}
+\end{enumerate}
+As mentioned before, only four of these test cases were performed on GraphQL. Test case 2.B. was excluded for GraphQL. GraphQL's query structure and query resolving functionality is based on the idea that such requests can always be done in one request and thus, artificially fetching the data in multiple requests when no extra effort is needed to do it in one was deemed pointless, as that would not be done in a real world setting.
+A similar argument could be made for REST. REST is designed around the principle of fetching a single resource (type) at a time, so creating an ad-hoc endpoint that fetches several at once would go against that principle. However, since developers might be tempted to create such endpoints to circumvent the issue of under-fetching, the decision was made to test the performance of those as well, to see whether these ad-hoc endpoints offer a sufficient performance advantage that could convince developers to stick with HTTP endpoints rather than spend time and money on switching to another protocol (such as GraphQL).
+For gRPC and RSocket, no principles have been introduced that dictate which method of fetching multiple related resources should be used. Thus, to ensure a complete comparison, both test cases were applied.
+
+\section{Test implementation}
+
+The five test cases were implemented based on fetching the following resources:
+\begin{enumerate}
+    \item A single user.
+    \item All trips beginning in a certain time period, for a certain distribution center, then all delivery IDs associated with each trip. Next, each delivery associated with these delivery IDs and finally the user associated with each delivery.
+    \item A single user, a single distribution center and a list of delivery IDs for a single trip.
+\end{enumerate}
+For test cases 2.A. and 2.B., the process was as follows:
+\begin{itemize}
+    \item 2.a: All resources fetched by supplying the initial parameters of the time period and distribution center ID.
+    \item 2.b: Trips fetched by supplying the same initial parameters. The trip IDs were extracted from the results, and used to fetch the list of delivery IDs for each trip. Those were then used to fetch each delivery, after which the user IDs were extracted from each to fetch the respective user.
+\end{itemize}
+For test cases 3.A. and 3.B., the three requests were performed respectively in parallel (firing off each in sequence without waiting for the results of the previous) and in sequence (only firing off a request when all data from the previous has been received).
+
+These five test cases (four in the case of GraphQL) were all performed 100 times each \footnote{The tests were also performed with 1000 iterations with similar results, which indicates that 100 was high enough to give statistically significant results.}, in sequence with a 0.5 s delay between runs to ensure the previous run was not affecting the next one. In total, 19 tests were run and 19 sets of measurements collected, resulting in 5 comparisons that are detailed in graphs in chapter \ref{sec:results}. The results for test case 2 for GraphQL is represented in both the graphs for test case 2a as well as for test case 2b.
+
+RSocket and gRPC both offer the functionality of reusing the connection established for multiple requests. In gRPC, this is the default, unchangeable mechanism and performed under the hood. RSocket offers more control and allows the developer to decide exactly when and how the connection is reused. To ensure a fair and realistic comparison, both protocols were tested with the setup where each iteration used a single connection, no matter how many requests were performed in that iteration. Thus, for the 100 iterations, 100 connections were established. This was done to mimic the behavior of 100 different clients connecting to the server.

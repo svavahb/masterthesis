@@ -1,0 +1,45 @@
+
+% this file is called up by thesis.tex
+% content in this file will be fed into the main document
+
+%: ----------------------- introduction file header -----------------------
+\chapter{Introduction}\label{sec:intro}
+
+
+% ----------------------------------------------------------------------
+%: ----------------------- introduction content ----------------------- 
+% ----------------------------------------------------------------------
+
+
+
+%: ----------------------- HELP: latex document organisation
+% the commands below help you to subdivide and organise your thesis
+%    \chapter{}       = level 1, top level
+%    \section{}       = level 2
+%    \subsection{}    = level 3
+%    \subsubsection{} = level 4
+% note that everything after the percentage sign is hidden from output
+
+
+
+Microservice architecture has been one of the most popular software architecture patterns in the last years, likely bolstered by the fact that many of the largest tech companies in the world have adopted it (among those are Google \cite{googlemicroservices} and Netflix \cite{netflixmicroservices}). Like with any system that relies on distributed components working together to form a cohesive whole, how the microservices communicate is of utmost importance. Any communication over the network adds extra overhead that does not exist in a monolithic architecture, which means that the methods, protocols and frameworks used for the communication need to be highly performant and convenient to minimize this effect. In the 2018 survey \textit{Challenges of Microservices Architecture}, 2 out of every 5 developers noted that performance and response time were very important, both of which can be greatly affected by the communication technology employed \cite{ghofrani2018challenges}. Similarly, Viggiato et al. found that 48.3\% out of 122 respondents rated "Expensive remote calls" as important or very important challenges of microservices \cite{viggiato2018microservices}. In addition, Zimmerman identified 9 potential research topics related to microservices architecture, the fourth of which included the question "... is RESTful HTTP only one of several valid remote communication options in the microservices architect's toolbox, and, if so, what are the decision drivers when choosing an option?" \cite{zimmermann2016microservices}. Thus, the performance of microservices communication, the choice of technology for this purpose and the design of interfaces are all highly relevant and necessary topics of interest for microservices-focused literature.
+
+\section{Problem statement and research questions}
+
+This thesis was written as part of an internship at Picnic, Amsterdam. Picnic is a Dutch online grocery service which handles all the logistics of procuring groceries, taking orders, fulfilling them and delivering them to the customer's door, with most of the technology used being developed in-house (including the app used by customers for ordering groceries). Like many start-ups, Picnic started out with a monolithic architecture, but has in recent years been extracting functionality out of the monolith into smaller services in an attempt to transfer to a more modular, microservices-based ecosystem. Most of these microservices expose a RESTful HTTP-based API (see section \ref{sec:rest} for more details on REST) which is used for both between-services and client-server communications. As the Picnic ecosystem grows and more microservices are extracted, it is imperative to keep the system highly performant. It is in Picnic's best interest to investigate whether their current approach is really the best one, or whether performance gains could be made by switching to a new mode of communication. In addition, performance is not the only metric that matters when choosing a technology for remote communications. The chosen style, framework or protocol should ideally also complement the main architecture of the system as well as be convenient in use, development and maintenance. Thus, the following two research questions are posed in this thesis:
+
+\begin{enumerate}
+    \item Which communication patterns are suitable for microservices, in terms of architecture, interface design, features offered and efforts required to develop and maintain such a system?
+    \item How much can the performance of communication between a web application and a system of microservices improve with these new techniques, compared to a RESTful API served over HTTP requests?
+\end{enumerate}
+
+The REST architectural style has been the main choice for developers building HTTP web services and APIs in the last 10 years. According to the 2020 developer survey by Rapid API, 62.5\% of respondents currently use REST in production \cite{rapid2020survey}. For microservices specifically, a similar trend can be observed. In the 2020 survey of IT experts \textit{State of Microservices} conducted by The Software House, 76.8\% of respondents said their microservices communicate with each other over HTTP \cite{stateofmicroservices}. However, other modes of communication have been slowly gaining traction in the last years. The three technologies chosen for comparison with REST over HTTP for this thesis were GraphQL, gRPC and RSocket.
+
+GraphQL is a query language developed at Facebook and officially introduced in 2015 \cite{schrock2015blog}. It was not designed explicitly with microservices in mind, but it has seen growing interest as an alternative to REST for traditional HTTP-based APIs. According to the 2019 State of JS survey, 38.7\% of web developers have used GraphQL and would use it again, compared to 5\% in 2016. Additionally, 50.6\% of respondents had heard of it and would like to learn it \cite{stateofjs}. On the other hand, Google developed gRPC specifically for its internal microservices. According to the aforementioned Rapid API survey, 13.5\% of respondents use gRPC \cite{rapid2020survey}. gRPC is, as the name suggests, an RPC framework built over HTTP/2 which aims to offer better performance than traditional HTTP-based protocols, frameworks and styles \cite{aboutgrpc}. The last communication mode chosen for this thesis was RSocket. RSocket is a messaging protocol designed for byte stream transport and intended to support reactive microservices, originating from a Netflix project but currently supported by a number of industry leaders such as Facebook, Netifi and Pivotal \cite{netifi2017rsocket}. The reactive focus makes RSocket an interesting candidate for Picnic and any other company embracing the reactive philosophy.
+
+\section{Methodology}
+First, a literature study will be conducted to gain insight into the current landscape surrounding this problem area. This study will aim both to provide background information into the technologies and concepts covered in this thesis, as well as identify related literature and approaches.
+
+The first research question will be answered with a comparative analysis of the four communication technologies, supported by the specifications of each as well as a literature review. First, each technologies' usage of transfer protocols will be discussed. Next, the contracting (or lack thereof) of service interfaces will be compared between the four technologies. In chapter \ref{sec:suitability}, each communication method's suitability for the microservices architecture will then be assessed based on the analysis in the preceding section. The second research question will be answered with a case study within Picnic and experimentation performed to assess the performance of each technology in a number of test cases mimicking real-world use cases, focused solely on fetching data (rather than updating or inserting it). The thesis will then conclude by combining the conclusions resulting from each research question and an attempt will be made to provide a recommendation for which communication technologies are suited to Picnic's use case.
+
+% Thesis outline?

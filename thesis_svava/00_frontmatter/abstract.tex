@@ -1,0 +1,13 @@
+
+% Thesis Abstract -----------------------------------------------------
+
+
+%\begin{abstractslong}    %uncommenting this line, gives a different abstract heading
+\begin{abstracts}        %this creates the heading for the abstract page
+
+Microservices have gained interest in the last years, often as an alternative to monolithic applications. Microservice architecture revolves around independent services communicating over network interfaces. For them to be a viable alternative to an application in which all components can communicate locally (as is the case in monoliths), it is important that the network communication is efficient and has good performance. REST (REpresentational State Transfer) over HTTP is the most commonly used method of communication in microservice systems, but in recent years GraphQL, gRPC and RSocket have all been introduced as alternatives to REST. This thesis aims to evaluate the suitability of these four technologies for microservices, both through a comparative analysis of their architectures and through performance experiments based on a case study for Picnic Technologies. The results of this evaluation indicate that RSocket and gRPC are well suited for inter-service communication, both showing good performance in multiple cases. Their differences lie mainly in their architecture, with gRPC being an RPC client-server framework built over HTTP/2 while RSocket is a binary protocol with symmetric interaction models intended for byte stream transport such as TCP. On the other hand, GraphQL and REST are both better suited for client-facing APIs. Performance-wise, GraphQL does especially well for complex use cases, while REST performs the worst overall out of the four. GraphQL's schema, graph-based approach and client defined queries make it a good choice for more complex microservice architectures.
+\end{abstracts}
+%\end{abstractlongs}
+
+
+% ---------------------------------------------------------------------- 
